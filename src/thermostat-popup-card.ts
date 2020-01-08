@@ -35,7 +35,7 @@ class ThermostatPopupCard extends LitElement {
         max_temp: 40
       }
     }
-    var _handleSize = 20;
+    var _handleSize = 15;
     var _stepSize = stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 0.5;
     var gradient = true;
     var gradientPoints = [
@@ -343,7 +343,7 @@ class CustomRoundSlider extends LitElement {
     this.startAngle = 135;
     this.arcLength = 270;
     this.handleSize = 6;
-    this.handleZoom = 1.5;
+    this.handleZoom = 5;
     this.disabled = false;
     this.dragging = false;
     this.rtl = false;
@@ -438,7 +438,7 @@ class CustomRoundSlider extends LitElement {
       handle = handle.nextElementSibling
 
     if(!handle.classList.contains("handle")) return;
-    handle.setAttribute('stroke-width', 2*this.handleSize*this.handleZoom*this._scale);
+    handle.setAttribute('stroke-width', (this.handleSize*this._scale) + 5 + this.handleZoom);
 
     const min = handle.id === "high" ? this.low : this.min;
     const max = handle.id === "low" ? this.high : this.max;
@@ -450,7 +450,7 @@ class CustomRoundSlider extends LitElement {
     if(!this._rotation) return;
 
     const handle = this._rotation.handle;
-    handle.setAttribute('stroke-width', 2*this.handleSize*this._scale);
+    handle.setAttribute('stroke-width', (this.handleSize*this._scale) + 5);
 
     this._rotation = false;
     this.dragging = false;
@@ -566,12 +566,8 @@ class CustomRoundSlider extends LitElement {
 
   _renderHandle(id) {
     const theta = this._value2angle(this[id]);
-
-    console.log(theta);
-
     const pos = this._angle2xy(theta);
-
-    console.log(pos);
+    console.log('ID: '+id);
 
     // Two handles are drawn. One visible, and one invisible that's twice as
     // big. Makes it easier to click.
@@ -591,12 +587,11 @@ class CustomRoundSlider extends LitElement {
         <path
           id=${id}
           class="handle"
-          d="
-          M ${pos.x} ${pos.y}
-          L ${pos.x+0.001} ${pos.y+0.001}
-          "
+          d=${this._renderArc(
+            this._value2angle(id != 'low' ? this[id]-0.5: this[id] + 0.5),
+            this._value2angle(this[id])
+          )}
           vector-effect="non-scaling-stroke"
-          stroke-width="${2*this.handleSize*this._scale}"
           tabindex="0"
           @focus=${this.dragStart}
           @blur=${this.dragEnd}
@@ -615,7 +610,7 @@ class CustomRoundSlider extends LitElement {
         @touchstart=${this.dragStart}
         xmln="http://www.w3.org/2000/svg"
         viewBox="${-view.left} ${-view.up} ${view.width} ${view.height}"
-        style="margin: ${this.handleSize*this.handleZoom}px;"
+        style="margin: 30px;"
         focusable="false"
       >
         ${ this.gradient ? html`
@@ -635,6 +630,31 @@ class CustomRoundSlider extends LitElement {
           ${ this._enabled
             ? svg`
               <path
+                class="block"
+                vector-effect="non-scaling-stroke"
+                d=${this._renderArc(
+                  this._start,
+                  this._value2angle(this.low != null ? this.low : this.min)
+                )}
+              />
+              <path
+                class="block"
+                vector-effect="non-scaling-stroke"
+                d=${this._renderArc(
+                  this._value2angle(this.high != null ? this.high : this.value),
+                  this._end
+                )}
+              />
+              <path
+                class="block-dash"
+                stroke-dasharray="2, 25"
+                vector-effect="non-scaling-stroke"
+                d=${this._renderArc(
+                  this._start,
+                  this._end
+                )}
+              />
+              <path
                 class="bar"
                 vector-effect="non-scaling-stroke"
                 d=${this._renderArc(
@@ -642,46 +662,6 @@ class CustomRoundSlider extends LitElement {
                   this._value2angle(this.high != null ? this.high : this.value)
                 )}
               />
-              
-
-              <path
-                class="block"
-                vector-effect="non-scaling-stroke"
-                d=${this._renderArc(
-                  this._start,
-                  this._value2angle(this.low != null ? this.low : this.min)
-                )}
-              />
-              <path
-                class="block-dash"
-                stroke-dasharray="5, 2"
-                vector-effect="non-scaling-stroke"
-                d=${this._renderArc(
-                  this._start,
-                  this._value2angle(this.low != null ? this.low : this.min)
-                )}
-              />
-
-
-              <path
-                class="block"
-                vector-effect="non-scaling-stroke"
-                d=${this._renderArc(
-                  this._value2angle(this.high != null ? this.high : this.value),
-                  this._end
-                )}
-              />
-
-              <path
-                class="block-dash"
-                stroke-dasharray="2, 25"
-                vector-effect="non-scaling-stroke"
-                d=${this._renderArc(
-                  this._value2angle(this.high != null ? this.high : this.value),
-                  this._end
-                )}
-              />
-
               
               `
             : ``
@@ -726,17 +706,17 @@ class CustomRoundSlider extends LitElement {
       }
       .block-dash {
         stroke-width: var(--round-slider-dash-width, 20);
-        stroke: var(--round-slider-block-dash-color, #363638);
+        stroke: var(--round-slider-block-dash-color, rgba(255,255,255,0.1));
       }
       g.handles {
         stroke: var(--round-slider-handle-color, var(--round-slider-bar-color, deepskyblue));
         stroke-linecap: round;
       }
-      g.low.handle {
-        stroke: var(--round-slider-low-handle-color);
-      }
-      g.high.handle {
-        stroke: var(--round-slider-high-handle-color);
+      g.handle {
+        stroke-width: var(--round-slider-dash-width, 20);
+        stroke: #FFF;
+        stroke-dasharray: 3, 8;
+        stroke-linecap: butt;
       }
       .handle:focus {
         outline: unset;
