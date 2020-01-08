@@ -1,6 +1,6 @@
 import { LitElement, html, css, svg } from 'lit-element';
 import { closePopUp } from 'card-tools/src/popup';
-import { computeStateDisplay } from 'custom-card-helpers';
+import { computeStateDisplay, computeStateName } from 'custom-card-helpers';
 
 class ThermostatPopupCard extends LitElement {
   config: any;
@@ -23,18 +23,27 @@ class ThermostatPopupCard extends LitElement {
   render() {
     var entity = this.config.entity;
     var stateObj = this.hass.states[entity];
+    console.log(stateObj);
     var icon = this.config.icon ? this.config.icon : stateObj.attributes.icon ? stateObj.attributes.icon: 'mdi:lightbulb';
-        
-    var targetTemp = 19;
-    
-    var stateObj: any = {
-      attributes: {
-        // target_temp_low: 17,
-        // target_temp_high: 22,
-        min_temp: 0,
-        max_temp: 40
-      }
-    }
+
+    // REAL DATA
+    var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
+    var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
+    var currentTemp = stateObj.attributes.current_temperature
+
+    // DEV DATA
+    // var targetTemp = 22;
+    // var currentTemp = 20;
+    // var name = 'Verwarming';
+    // var stateObj: any = {
+    //   attributes: {
+    //     target_temp_low: 17,
+    //     target_temp_high: 22,
+    //     min_temp: 0,
+    //     max_temp: 40
+    //   }
+    // }
+
     var _handleSize = 15;
     var _stepSize = stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 0.5;
     var gradient = true;
@@ -49,11 +58,11 @@ class ThermostatPopupCard extends LitElement {
         <div class="popup-inner">
           <div class="info">
             <div class="temp">
-              22&#176;
+              ${currentTemp}&#176;
             </div>
             <div class="right">
-              <div class="name">Name</div>
-              <div class="action">Koelen 21&#176;</div>
+              <div class="name">${name}</div>
+              <div class="action">Koelen ${targetTemp}&#176;</div>
             </div>
           </div>
 
@@ -76,8 +85,49 @@ class ThermostatPopupCard extends LitElement {
 
               <div id="slider-center">
                 <div class="values">
-                  <div class="action">Koelen</div>
-                  <div class="value">21&#176;</div>
+                  <div class="action">
+                    ${
+                      stateObj.attributes.hvac_action
+                        ? this.hass!.localize(
+                            `state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`
+                          )
+                        : this.hass!.localize(`state.climate.${stateObj.state}`)
+                    }
+                    ${
+                      stateObj.attributes.preset_mode &&
+                      stateObj.attributes.preset_mode !== "none"
+                        ? html`
+                            -
+                            ${this.hass!.localize(
+                              `state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`
+                            ) || stateObj.attributes.preset_mode}
+                          `
+                        : ""
+                    }
+                  </div>
+                  <div class="value">
+                    ${
+                      !this._setTemp
+                        ? ""
+                        : Array.isArray(this._setTemp)
+                        ? _stepSize === 1
+                          ? svg`
+                              ${this._setTemp[0].toFixed()}&#176; -
+                              ${this._setTemp[1].toFixed()}&#176;
+                              `
+                          : svg`
+                              ${this._setTemp[0].toFixed(1)}&#176; -
+                              ${this._setTemp[1].toFixed(1)}&#176;
+                              `
+                        : _stepSize === 1
+                        ? svg`
+                              ${this._setTemp.toFixed()}&#176;
+                              `
+                        : svg`
+                              ${this._setTemp.toFixed(1)}&#176;
+                              `
+                    }
+                  </div>
                 </div>
               </div>
             </div>
@@ -87,7 +137,27 @@ class ThermostatPopupCard extends LitElement {
     `;
   }
   
-  updated() { }
+  updated() {
+    this._setTemp = this._getSetTemp(this.hass!.states[this.config!.entity]);
+  }
+
+  _getSetTemp(stateObj) {
+    if (stateObj.state === "unavailable") {
+      return this.hass!.localize("state.default.unavailable");
+    }
+
+    if (
+      stateObj.attributes.target_temp_low &&
+      stateObj.attributes.target_temp_high
+    ) {
+      return [
+        stateObj.attributes.target_temp_low,
+        stateObj.attributes.target_temp_high,
+      ];
+    }
+
+    return stateObj.attributes.temperature;
+  }
 
   _close(event) {
       if(event && event.target.className === 'popup-inner') {
@@ -702,6 +772,7 @@ class CustomRoundSlider extends LitElement {
         stroke: var(--round-slider-bar-color, transparent);
       }
       .block {
+        stroke-width: calc(var(--round-slider-path-width, 30) + 1);
         stroke: var(--round-slider-block-color, #2c2c2e);
       }
       .block-dash {
