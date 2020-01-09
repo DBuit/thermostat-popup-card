@@ -1,4 +1,5 @@
 import { LitElement, html, css, svg } from 'lit-element';
+import { classMap } from "lit-html/directives/class-map";
 import { closePopUp } from 'card-tools/src/popup';
 import { computeStateDisplay, computeStateName } from 'custom-card-helpers';
 
@@ -7,6 +8,24 @@ class ThermostatPopupCard extends LitElement {
   hass: any;
   shadowRoot: any;
   _setTemp: any;
+  hvacModeOrdering = {
+    auto: 1,
+    heat_cool: 2,
+    heat: 3,
+    cool: 4,
+    dry: 5,
+    fan_only: 6,
+    off: 7,
+  };
+  modeIcons = {
+    auto: "hass:calendar-repeat",
+    heat_cool: "hass:autorenew",
+    heat: "hass:fire",
+    cool: "hass:snowflake",
+    off: "hass:power",
+    fan_only: "hass:fan",
+    dry: "hass:water-percent",
+  };
 
   static get properties() {
     return {
@@ -30,17 +49,23 @@ class ThermostatPopupCard extends LitElement {
     var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
     var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
     var currentTemp = stateObj.attributes.current_temperature
+    var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
+
 
     // DEV DATA
     // var targetTemp = 22;
     // var currentTemp = 20;
+    // var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
     // var name = 'Verwarming';
     // var stateObj: any = {
     //   attributes: {
-    //     target_temp_low: 17,
-    //     target_temp_high: 22,
-    //     min_temp: 0,
-    //     max_temp: 40
+    //     hvac_modes: ['heat', 'off'],
+    //     preset_mode: null,
+    //     preset_modes: ['eco', 'comfort'],
+    //     // target_temp_low: 17,
+    //     // target_temp_high: 22,
+    //     min_temp: 8,
+    //     max_temp: 28
     //   }
     // }
 
@@ -48,21 +73,43 @@ class ThermostatPopupCard extends LitElement {
     var _stepSize = stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 0.5;
     var gradient = true;
     var gradientPoints = [
-      {point: 0, color: '#77d5e1'},
-      // {point: 50, color: '#6db06a'},
-      {point: 100, color: '#f3bd3f'}
+      {point: 0, color: '#4fdae4'},
+      {point: 10, color: '#2da9d8'},
+      {point: 25, color: '#56b557'},
+      {point: 50, color: '#f4c807'},
+      {point: 70, color: '#faaa00'},
+      {point: 100, color: '#f86618'},
     ];
 
     return html`
       <div class="popup-wrapper" @click="${e => this._close(e)}">
         <div class="popup-inner">
           <div class="info">
-            <div class="temp">
+            <div class="temp ${mode}">
               ${currentTemp}&#176;
             </div>
             <div class="right">
               <div class="name">${name}</div>
-              <div class="action">Koelen ${targetTemp}&#176;</div>
+              <div class="action">
+              ${
+                stateObj.attributes.hvac_action
+                  ? this.hass!.localize(
+                      `state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`
+                    )
+                  : this.hass!.localize(`state.climate.${stateObj.state}`)
+              }
+              ${
+                stateObj.attributes.preset_mode &&
+                stateObj.attributes.preset_mode !== "none"
+                  ? html`
+                      -
+                      ${this.hass!.localize(
+                        `state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`
+                      ) || stateObj.attributes.preset_mode}
+                    `
+                  : ""
+              }
+               ${targetTemp}&#176;</div>
             </div>
           </div>
 
@@ -132,6 +179,12 @@ class ThermostatPopupCard extends LitElement {
               </div>
             </div>
           </div>
+          <div id="modes">
+            ${(stateObj.attributes.hvac_modes || [])
+              .concat()
+              .sort(this._compareClimateHvacModes)
+              .map((modeItem) => this._renderIcon(modeItem, mode))}
+          </div>
         </div>
       </div>
     `;
@@ -140,6 +193,32 @@ class ThermostatPopupCard extends LitElement {
   updated() {
     this._setTemp = this._getSetTemp(this.hass!.states[this.config!.entity]);
   }
+
+  _renderIcon(mode: string, currentMode: string) {
+    if (!this.modeIcons[mode]) {
+      return html``;
+    }
+    return html`
+      <paper-icon-button
+        class="${classMap({ "selected-icon": currentMode === mode })}"
+        .mode="${mode}"
+        .icon="${this.modeIcons[mode]}"
+        @click="${this._handleModeClick}"
+        tabindex="0"
+      ></paper-icon-button>
+    `;
+  }
+
+  
+  _handleModeClick(e: MouseEvent): void {
+    this.hass!.callService("climate", "set_hvac_mode", {
+      entity_id: this.config!.entity,
+      hvac_mode: (e.currentTarget as any).mode,
+    });
+  }
+
+
+
 
   _getSetTemp(stateObj) {
     if (stateObj.state === "unavailable") {
@@ -199,6 +278,8 @@ class ThermostatPopupCard extends LitElement {
       });
     }
   }
+
+  _compareClimateHvacModes = (mode1, mode2) => this.hvacModeOrdering[mode1] - this.hvacModeOrdering[mode2];
   
   setConfig(config) {
     if (!config.entity) {
@@ -215,6 +296,16 @@ class ThermostatPopupCard extends LitElement {
     return css`
         :host {
             background-color:#000!important;
+            --auto-color: green;
+            --eco-color: springgreen;
+            --cool-color: #2b9af9;
+            --heat-color: #ff8100;
+            --manual-color: #44739e;
+            --off-color: #8a8a8a;
+            --fan_only-color: #8a8a8a;
+            --dry-color: #efbd07;
+            --idle-color: #8a8a8a;
+            --unknown-color: #bac;
         }
         .popup-wrapper {
           position: absolute;
@@ -246,6 +337,39 @@ class ThermostatPopupCard extends LitElement {
           color:#FFF;
           font-size:18px;
         }
+
+        .info .temp.heat_cool {
+          background-color: var(--auto-color);
+        }
+        .info .temp.cool {
+          background-color: var(--cool-color);
+        }
+        .info .temp.heat {
+          background-color: var(--heat-color);
+        }
+        .info .temp.manual {
+          background-color: var(--manual-color);
+        }
+        .info .temp.off {
+          background-color: var(--off-color);
+        }
+        .info .temp.fan_only {
+          background-color: var(--fan_only-color);
+        }
+        .info .temp.eco {
+          background-color: var(--eco-color);
+        }
+        .info .temp.dry {
+          background-color: var(--dry-color);
+        }
+        .info .temp.idle {
+          background-color: var(--idle-color);
+        }
+        .info .temp.unknown-mode {
+          background-color: var(--unknown-color);
+        }
+
+
         .info .right {
           display:flex;
           flex-direction:column;
@@ -500,12 +624,20 @@ class CustomRoundSlider extends LitElement {
   dragStart(ev) {
     let handle = ev.target;
 
+    console.log(handle);
+
     // Avoid double events mouseDown->focus
-    if(this._rotation && this._rotation.type !== "focus") return;
+    if(this._rotation && this._rotation.type !== "focus") {
+      console.log('AVOUD DOUBLE');
+      return;
+    }
 
     // If an invisible handle was clicked, switch to the visible counterpart
-    if(handle.classList.contains("overflow"))
+    if(handle.classList.contains("overflow")) {
+      console.log('SWITCH VISIBLE')
       handle = handle.nextElementSibling
+    }
+      
 
     if(!handle.classList.contains("handle")) return;
     handle.setAttribute('stroke-width', (this.handleSize*this._scale) + 5 + this.handleZoom);
@@ -652,13 +784,14 @@ class CustomRoundSlider extends LitElement {
           "
           vector-effect="non-scaling-stroke"
           stroke="rgba(0,0,0,0)"
+          stroke-linecap="round"
           stroke-width="${4*this.handleSize*this._scale}"
           />
         <path
           id=${id}
           class="handle"
           d=${this._renderArc(
-            this._value2angle(id != 'low' ? this[id]-0.5: this[id] + 0.5),
+            this._value2angle(id != 'low' ? this[id]-0.35: this[id] + 0.35),
             this._value2angle(this[id])
           )}
           vector-effect="non-scaling-stroke"

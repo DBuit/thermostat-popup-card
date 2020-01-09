@@ -12,9 +12,55 @@
  * http://polymer.github.io/PATENTS.txt
  */
 const directives = new WeakMap();
+/**
+ * Brands a function as a directive factory function so that lit-html will call
+ * the function during template rendering, rather than passing as a value.
+ *
+ * A _directive_ is a function that takes a Part as an argument. It has the
+ * signature: `(part: Part) => void`.
+ *
+ * A directive _factory_ is a function that takes arguments for data and
+ * configuration and returns a directive. Users of directive usually refer to
+ * the directive factory as the directive. For example, "The repeat directive".
+ *
+ * Usually a template author will invoke a directive factory in their template
+ * with relevant arguments, which will then return a directive function.
+ *
+ * Here's an example of using the `repeat()` directive factory that takes an
+ * array and a function to render an item:
+ *
+ * ```js
+ * html`<ul><${repeat(items, (item) => html`<li>${item}</li>`)}</ul>`
+ * ```
+ *
+ * When `repeat` is invoked, it returns a directive function that closes over
+ * `items` and the template function. When the outer template is rendered, the
+ * return directive function is called with the Part for the expression.
+ * `repeat` then performs it's custom logic to render multiple items.
+ *
+ * @param f The directive factory function. Must be a function that returns a
+ * function of the signature `(part: Part) => void`. The returned function will
+ * be called with the part object.
+ *
+ * @example
+ *
+ * import {directive, html} from 'lit-html';
+ *
+ * const immutable = directive((v) => (part) => {
+ *   if (part.value !== v) {
+ *     part.setValue(v)
+ *   }
+ * });
+ */
+const directive = (f) => ((...args) => {
+    const d = f(...args);
+    directives.set(d, true);
+    return d;
+});
 const isDirective = (o) => {
     return typeof o === 'function' && directives.has(o);
 };
+//# sourceMappingURL=directive.js.map
 
 /**
  * @license
@@ -58,6 +104,7 @@ const removeNodes = (container, start, end = null) => {
         start = n;
     }
 };
+//# sourceMappingURL=dom.js.map
 
 /**
  * @license
@@ -81,6 +128,7 @@ const noChange = {};
  * A sentinel value that signals a NodePart to fully clear its content.
  */
 const nothing = {};
+//# sourceMappingURL=part.js.map
 
 /**
  * @license
@@ -294,6 +342,7 @@ const createMarker = () => document.createComment('');
  *    * (') then any non-(')
  */
 const lastAttributeNameRegex = /([ \x09\x0a\x0c\x0d])([^\0-\x1F\x7F-\x9F "'>=/]+)([ \x09\x0a\x0c\x0d]*=[ \x09\x0a\x0c\x0d]*(?:[^ \x09\x0a\x0c\x0d"'`<>=]*|"[^"]*|'[^']*))$/;
+//# sourceMappingURL=template.js.map
 
 /**
  * @license
@@ -426,6 +475,7 @@ class TemplateInstance {
         return fragment;
     }
 }
+//# sourceMappingURL=template-instance.js.map
 
 /**
  * @license
@@ -534,6 +584,7 @@ class SVGTemplateResult extends TemplateResult {
         return template;
     }
 }
+//# sourceMappingURL=template-result.js.map
 
 /**
  * @license
@@ -973,6 +1024,7 @@ const getOptions = (o) => o &&
     (eventOptionsSupported ?
         { capture: o.capture, passive: o.passive, once: o.once } :
         o.capture);
+//# sourceMappingURL=parts.js.map
 
 /**
  * @license
@@ -1024,6 +1076,7 @@ class DefaultTemplateProcessor {
     }
 }
 const defaultTemplateProcessor = new DefaultTemplateProcessor();
+//# sourceMappingURL=default-template-processor.js.map
 
 /**
  * @license
@@ -1071,6 +1124,7 @@ function templateFactory(result) {
     return template;
 }
 const templateCaches = new Map();
+//# sourceMappingURL=template-factory.js.map
 
 /**
  * @license
@@ -1111,6 +1165,7 @@ const render = (result, container, options) => {
     part.setValue(result);
     part.commit();
 };
+//# sourceMappingURL=render.js.map
 
 /**
  * @license
@@ -1139,6 +1194,7 @@ const html = (strings, ...values) => new TemplateResult(strings, values, 'html',
  * render to and update a container.
  */
 const svg = (strings, ...values) => new SVGTemplateResult(strings, values, 'svg', defaultTemplateProcessor);
+//# sourceMappingURL=lit-html.js.map
 
 /**
  * @license
@@ -1263,6 +1319,7 @@ function insertNodeIntoTemplate(template, node, refNode = null) {
         }
     }
 }
+//# sourceMappingURL=modify-template.js.map
 
 /**
  * @license
@@ -1532,6 +1589,7 @@ const render$1 = (result, container, options) => {
         window.ShadyCSS.styleElement(container.host);
     }
 };
+//# sourceMappingURL=shady-render.js.map
 
 /**
  * @license
@@ -2157,6 +2215,7 @@ _a = finalized;
  * Marks class as having finished creating properties.
  */
 UpdatingElement[_a] = true;
+//# sourceMappingURL=updating-element.js.map
 
 /**
 @license
@@ -2220,6 +2279,7 @@ const css = (strings, ...values) => {
     const cssText = values.reduce((acc, v, idx) => acc + textFromCSSResult(v) + strings[idx + 1], strings[0]);
     return new CSSResult(cssText, constructionToken);
 };
+//# sourceMappingURL=css-tag.js.map
 
 /**
  * @license
@@ -2417,6 +2477,69 @@ LitElement['finalized'] = true;
  * @nocollapse
  */
 LitElement.render = render$1;
+//# sourceMappingURL=lit-element.js.map
+
+/**
+ * @license
+ * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+/**
+ * Stores the ClassInfo object applied to a given AttributePart.
+ * Used to unset existing values when a new ClassInfo object is applied.
+ */
+const classMapCache = new WeakMap();
+/**
+ * A directive that applies CSS classes. This must be used in the `class`
+ * attribute and must be the only part used in the attribute. It takes each
+ * property in the `classInfo` argument and adds the property name to the
+ * element's `classList` if the property value is truthy; if the property value
+ * is falsey, the property name is removed from the element's `classList`. For
+ * example
+ * `{foo: bar}` applies the class `foo` if the value of `bar` is truthy.
+ * @param classInfo {ClassInfo}
+ */
+const classMap = directive((classInfo) => (part) => {
+    if (!(part instanceof AttributePart) || (part instanceof PropertyPart) ||
+        part.committer.name !== 'class' || part.committer.parts.length > 1) {
+        throw new Error('The `classMap` directive must be used in the `class` attribute ' +
+            'and must be the only part in the attribute.');
+    }
+    const { committer } = part;
+    const { element } = committer;
+    // handle static classes
+    if (!classMapCache.has(part)) {
+        element.className = committer.strings.join(' ');
+    }
+    const { classList } = element;
+    // remove old classes that no longer apply
+    const oldInfo = classMapCache.get(part);
+    for (const name in oldInfo) {
+        if (!(name in classInfo)) {
+            classList.remove(name);
+        }
+    }
+    // add new classes
+    for (const name in classInfo) {
+        const value = classInfo[name];
+        if (!oldInfo || value !== oldInfo[name]) {
+            // We explicitly want a loose truthy check here because
+            // it seems more convenient that '' and 0 are skipped.
+            const method = value ? 'add' : 'remove';
+            classList[method](name);
+        }
+    }
+    classMapCache.set(part, classInfo);
+});
+//# sourceMappingURL=class-map.js.map
 
 function provideHass(element) {
   return document.querySelector("home-assistant").provideHass(element);
@@ -3013,6 +3136,25 @@ var a=function(){try{(new Date).toLocaleDateString("i");}catch(e){return "RangeE
 class ThermostatPopupCard extends LitElement {
     constructor() {
         super();
+        this.hvacModeOrdering = {
+            auto: 1,
+            heat_cool: 2,
+            heat: 3,
+            cool: 4,
+            dry: 5,
+            fan_only: 6,
+            off: 7,
+        };
+        this.modeIcons = {
+            auto: "hass:calendar-repeat",
+            heat_cool: "hass:autorenew",
+            heat: "hass:fire",
+            cool: "hass:snowflake",
+            off: "hass:power",
+            fan_only: "hass:fan",
+            dry: "hass:water-percent",
+        };
+        this._compareClimateHvacModes = (mode1, mode2) => this.hvacModeOrdering[mode1] - this.hvacModeOrdering[mode2];
     }
     static get properties() {
         return {
@@ -3030,36 +3172,55 @@ class ThermostatPopupCard extends LitElement {
         var name = this.config.name || y(this.hass.states[this.config.entity]);
         var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
         var currentTemp = stateObj.attributes.current_temperature;
+        var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
         // DEV DATA
         // var targetTemp = 22;
         // var currentTemp = 20;
+        // var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
         // var name = 'Verwarming';
         // var stateObj: any = {
         //   attributes: {
-        //     target_temp_low: 17,
-        //     target_temp_high: 22,
-        //     min_temp: 0,
-        //     max_temp: 40
+        //     hvac_modes: ['heat', 'off'],
+        //     preset_mode: null,
+        //     preset_modes: ['eco', 'comfort'],
+        //     // target_temp_low: 17,
+        //     // target_temp_high: 22,
+        //     min_temp: 8,
+        //     max_temp: 28
         //   }
         // }
         var _handleSize = 15;
         var _stepSize = stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 0.5;
         var gradient = true;
         var gradientPoints = [
-            { point: 0, color: '#77d5e1' },
-            // {point: 50, color: '#6db06a'},
-            { point: 100, color: '#f3bd3f' }
+            { point: 0, color: '#4fdae4' },
+            { point: 10, color: '#2da9d8' },
+            { point: 25, color: '#56b557' },
+            { point: 50, color: '#f4c807' },
+            { point: 70, color: '#faaa00' },
+            { point: 100, color: '#f86618' },
         ];
         return html `
       <div class="popup-wrapper" @click="${e => this._close(e)}">
         <div class="popup-inner">
           <div class="info">
-            <div class="temp">
+            <div class="temp ${mode}">
               ${currentTemp}&#176;
             </div>
             <div class="right">
               <div class="name">${name}</div>
-              <div class="action">Koelen ${targetTemp}&#176;</div>
+              <div class="action">
+              ${stateObj.attributes.hvac_action
+            ? this.hass.localize(`state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`)
+            : this.hass.localize(`state.climate.${stateObj.state}`)}
+              ${stateObj.attributes.preset_mode &&
+            stateObj.attributes.preset_mode !== "none"
+            ? html `
+                      -
+                      ${this.hass.localize(`state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`) || stateObj.attributes.preset_mode}
+                    `
+            : ""}
+               ${targetTemp}&#176;</div>
             </div>
           </div>
 
@@ -3119,12 +3280,38 @@ class ThermostatPopupCard extends LitElement {
               </div>
             </div>
           </div>
+          <div id="modes">
+            ${(stateObj.attributes.hvac_modes || [])
+            .concat()
+            .sort(this._compareClimateHvacModes)
+            .map((modeItem) => this._renderIcon(modeItem, mode))}
+          </div>
         </div>
       </div>
     `;
     }
     updated() {
         this._setTemp = this._getSetTemp(this.hass.states[this.config.entity]);
+    }
+    _renderIcon(mode, currentMode) {
+        if (!this.modeIcons[mode]) {
+            return html ``;
+        }
+        return html `
+      <paper-icon-button
+        class="${classMap({ "selected-icon": currentMode === mode })}"
+        .mode="${mode}"
+        .icon="${this.modeIcons[mode]}"
+        @click="${this._handleModeClick}"
+        tabindex="0"
+      ></paper-icon-button>
+    `;
+    }
+    _handleModeClick(e) {
+        this.hass.callService("climate", "set_hvac_mode", {
+            entity_id: this.config.entity,
+            hvac_mode: e.currentTarget.mode,
+        });
     }
     _getSetTemp(stateObj) {
         if (stateObj.state === "unavailable") {
@@ -3192,6 +3379,16 @@ class ThermostatPopupCard extends LitElement {
         return css `
         :host {
             background-color:#000!important;
+            --auto-color: green;
+            --eco-color: springgreen;
+            --cool-color: #2b9af9;
+            --heat-color: #ff8100;
+            --manual-color: #44739e;
+            --off-color: #8a8a8a;
+            --fan_only-color: #8a8a8a;
+            --dry-color: #efbd07;
+            --idle-color: #8a8a8a;
+            --unknown-color: #bac;
         }
         .popup-wrapper {
           position: absolute;
@@ -3223,6 +3420,39 @@ class ThermostatPopupCard extends LitElement {
           color:#FFF;
           font-size:18px;
         }
+
+        .info .temp.heat_cool {
+          background-color: var(--auto-color);
+        }
+        .info .temp.cool {
+          background-color: var(--cool-color);
+        }
+        .info .temp.heat {
+          background-color: var(--heat-color);
+        }
+        .info .temp.manual {
+          background-color: var(--manual-color);
+        }
+        .info .temp.off {
+          background-color: var(--off-color);
+        }
+        .info .temp.fan_only {
+          background-color: var(--fan_only-color);
+        }
+        .info .temp.eco {
+          background-color: var(--eco-color);
+        }
+        .info .temp.dry {
+          background-color: var(--dry-color);
+        }
+        .info .temp.idle {
+          background-color: var(--idle-color);
+        }
+        .info .temp.unknown-mode {
+          background-color: var(--unknown-color);
+        }
+
+
         .info .right {
           display:flex;
           flex-direction:column;
@@ -3445,12 +3675,17 @@ class CustomRoundSlider extends LitElement {
     }
     dragStart(ev) {
         let handle = ev.target;
+        console.log(handle);
         // Avoid double events mouseDown->focus
-        if (this._rotation && this._rotation.type !== "focus")
+        if (this._rotation && this._rotation.type !== "focus") {
+            console.log('AVOUD DOUBLE');
             return;
+        }
         // If an invisible handle was clicked, switch to the visible counterpart
-        if (handle.classList.contains("overflow"))
+        if (handle.classList.contains("overflow")) {
+            console.log('SWITCH VISIBLE');
             handle = handle.nextElementSibling;
+        }
         if (!handle.classList.contains("handle"))
             return;
         handle.setAttribute('stroke-width', (this.handleSize * this._scale) + 5 + this.handleZoom);
@@ -3579,12 +3814,13 @@ class CustomRoundSlider extends LitElement {
           "
           vector-effect="non-scaling-stroke"
           stroke="rgba(0,0,0,0)"
+          stroke-linecap="round"
           stroke-width="${4 * this.handleSize * this._scale}"
           />
         <path
           id=${id}
           class="handle"
-          d=${this._renderArc(this._value2angle(id != 'low' ? this[id] - 0.5 : this[id] + 0.5), this._value2angle(this[id]))}
+          d=${this._renderArc(this._value2angle(id != 'low' ? this[id] - 0.35 : this[id] + 0.35), this._value2angle(this[id]))}
           vector-effect="non-scaling-stroke"
           tabindex="0"
           @focus=${this.dragStart}
