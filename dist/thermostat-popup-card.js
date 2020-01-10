@@ -60,6 +60,7 @@ const directive = (f) => ((...args) => {
 const isDirective = (o) => {
     return typeof o === 'function' && directives.has(o);
 };
+//# sourceMappingURL=directive.js.map
 
 /**
  * @license
@@ -103,6 +104,7 @@ const removeNodes = (container, start, end = null) => {
         start = n;
     }
 };
+//# sourceMappingURL=dom.js.map
 
 /**
  * @license
@@ -126,6 +128,7 @@ const noChange = {};
  * A sentinel value that signals a NodePart to fully clear its content.
  */
 const nothing = {};
+//# sourceMappingURL=part.js.map
 
 /**
  * @license
@@ -339,6 +342,7 @@ const createMarker = () => document.createComment('');
  *    * (') then any non-(')
  */
 const lastAttributeNameRegex = /([ \x09\x0a\x0c\x0d])([^\0-\x1F\x7F-\x9F "'>=/]+)([ \x09\x0a\x0c\x0d]*=[ \x09\x0a\x0c\x0d]*(?:[^ \x09\x0a\x0c\x0d"'`<>=]*|"[^"]*|'[^']*))$/;
+//# sourceMappingURL=template.js.map
 
 /**
  * @license
@@ -471,6 +475,7 @@ class TemplateInstance {
         return fragment;
     }
 }
+//# sourceMappingURL=template-instance.js.map
 
 /**
  * @license
@@ -579,6 +584,7 @@ class SVGTemplateResult extends TemplateResult {
         return template;
     }
 }
+//# sourceMappingURL=template-result.js.map
 
 /**
  * @license
@@ -1018,6 +1024,7 @@ const getOptions = (o) => o &&
     (eventOptionsSupported ?
         { capture: o.capture, passive: o.passive, once: o.once } :
         o.capture);
+//# sourceMappingURL=parts.js.map
 
 /**
  * @license
@@ -1069,6 +1076,7 @@ class DefaultTemplateProcessor {
     }
 }
 const defaultTemplateProcessor = new DefaultTemplateProcessor();
+//# sourceMappingURL=default-template-processor.js.map
 
 /**
  * @license
@@ -1116,6 +1124,7 @@ function templateFactory(result) {
     return template;
 }
 const templateCaches = new Map();
+//# sourceMappingURL=template-factory.js.map
 
 /**
  * @license
@@ -1156,6 +1165,7 @@ const render = (result, container, options) => {
     part.setValue(result);
     part.commit();
 };
+//# sourceMappingURL=render.js.map
 
 /**
  * @license
@@ -1184,6 +1194,7 @@ const html = (strings, ...values) => new TemplateResult(strings, values, 'html',
  * render to and update a container.
  */
 const svg = (strings, ...values) => new SVGTemplateResult(strings, values, 'svg', defaultTemplateProcessor);
+//# sourceMappingURL=lit-html.js.map
 
 /**
  * @license
@@ -1308,6 +1319,7 @@ function insertNodeIntoTemplate(template, node, refNode = null) {
         }
     }
 }
+//# sourceMappingURL=modify-template.js.map
 
 /**
  * @license
@@ -1577,6 +1589,7 @@ const render$1 = (result, container, options) => {
         window.ShadyCSS.styleElement(container.host);
     }
 };
+//# sourceMappingURL=shady-render.js.map
 
 /**
  * @license
@@ -2202,6 +2215,7 @@ _a = finalized;
  * Marks class as having finished creating properties.
  */
 UpdatingElement[_a] = true;
+//# sourceMappingURL=updating-element.js.map
 
 /**
 @license
@@ -2265,6 +2279,7 @@ const css = (strings, ...values) => {
     const cssText = values.reduce((acc, v, idx) => acc + textFromCSSResult(v) + strings[idx + 1], strings[0]);
     return new CSSResult(cssText, constructionToken);
 };
+//# sourceMappingURL=css-tag.js.map
 
 /**
  * @license
@@ -2462,6 +2477,7 @@ LitElement['finalized'] = true;
  * @nocollapse
  */
 LitElement.render = render$1;
+//# sourceMappingURL=lit-element.js.map
 
 /**
  * @license
@@ -2523,6 +2539,7 @@ const classMap = directive((classInfo) => (part) => {
     }
     classMapCache.set(part, classInfo);
 });
+//# sourceMappingURL=class-map.js.map
 
 function provideHass(element) {
   return document.querySelector("home-assistant").provideHass(element);
@@ -2787,335 +2804,6 @@ function closePopUp() {
     moreInfoEl.close();
 }
 
-/**
- * Parse or format dates
- * @class fecha
- */
-var fecha = {};
-var token = /d{1,4}|M{1,4}|YY(?:YY)?|S{1,3}|Do|ZZ|([HhMsDm])\1?|[aA]|"[^"]*"|'[^']*'/g;
-var twoDigits = '\\d\\d?';
-var threeDigits = '\\d{3}';
-var fourDigits = '\\d{4}';
-var word = '[^\\s]+';
-var literal = /\[([^]*?)\]/gm;
-var noop = function () {
-};
-
-function regexEscape(str) {
-  return str.replace( /[|\\{()[^$+*?.-]/g, '\\$&');
-}
-
-function shorten(arr, sLen) {
-  var newArr = [];
-  for (var i = 0, len = arr.length; i < len; i++) {
-    newArr.push(arr[i].substr(0, sLen));
-  }
-  return newArr;
-}
-
-function monthUpdate(arrName) {
-  return function (d, v, i18n) {
-    var index = i18n[arrName].indexOf(v.charAt(0).toUpperCase() + v.substr(1).toLowerCase());
-    if (~index) {
-      d.month = index;
-    }
-  };
-}
-
-function pad(val, len) {
-  val = String(val);
-  len = len || 2;
-  while (val.length < len) {
-    val = '0' + val;
-  }
-  return val;
-}
-
-var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-var monthNamesShort = shorten(monthNames, 3);
-var dayNamesShort = shorten(dayNames, 3);
-fecha.i18n = {
-  dayNamesShort: dayNamesShort,
-  dayNames: dayNames,
-  monthNamesShort: monthNamesShort,
-  monthNames: monthNames,
-  amPm: ['am', 'pm'],
-  DoFn: function DoFn(D) {
-    return D + ['th', 'st', 'nd', 'rd'][D % 10 > 3 ? 0 : (D - D % 10 !== 10) * D % 10];
-  }
-};
-
-var formatFlags = {
-  D: function(dateObj) {
-    return dateObj.getDate();
-  },
-  DD: function(dateObj) {
-    return pad(dateObj.getDate());
-  },
-  Do: function(dateObj, i18n) {
-    return i18n.DoFn(dateObj.getDate());
-  },
-  d: function(dateObj) {
-    return dateObj.getDay();
-  },
-  dd: function(dateObj) {
-    return pad(dateObj.getDay());
-  },
-  ddd: function(dateObj, i18n) {
-    return i18n.dayNamesShort[dateObj.getDay()];
-  },
-  dddd: function(dateObj, i18n) {
-    return i18n.dayNames[dateObj.getDay()];
-  },
-  M: function(dateObj) {
-    return dateObj.getMonth() + 1;
-  },
-  MM: function(dateObj) {
-    return pad(dateObj.getMonth() + 1);
-  },
-  MMM: function(dateObj, i18n) {
-    return i18n.monthNamesShort[dateObj.getMonth()];
-  },
-  MMMM: function(dateObj, i18n) {
-    return i18n.monthNames[dateObj.getMonth()];
-  },
-  YY: function(dateObj) {
-    return pad(String(dateObj.getFullYear()), 4).substr(2);
-  },
-  YYYY: function(dateObj) {
-    return pad(dateObj.getFullYear(), 4);
-  },
-  h: function(dateObj) {
-    return dateObj.getHours() % 12 || 12;
-  },
-  hh: function(dateObj) {
-    return pad(dateObj.getHours() % 12 || 12);
-  },
-  H: function(dateObj) {
-    return dateObj.getHours();
-  },
-  HH: function(dateObj) {
-    return pad(dateObj.getHours());
-  },
-  m: function(dateObj) {
-    return dateObj.getMinutes();
-  },
-  mm: function(dateObj) {
-    return pad(dateObj.getMinutes());
-  },
-  s: function(dateObj) {
-    return dateObj.getSeconds();
-  },
-  ss: function(dateObj) {
-    return pad(dateObj.getSeconds());
-  },
-  S: function(dateObj) {
-    return Math.round(dateObj.getMilliseconds() / 100);
-  },
-  SS: function(dateObj) {
-    return pad(Math.round(dateObj.getMilliseconds() / 10), 2);
-  },
-  SSS: function(dateObj) {
-    return pad(dateObj.getMilliseconds(), 3);
-  },
-  a: function(dateObj, i18n) {
-    return dateObj.getHours() < 12 ? i18n.amPm[0] : i18n.amPm[1];
-  },
-  A: function(dateObj, i18n) {
-    return dateObj.getHours() < 12 ? i18n.amPm[0].toUpperCase() : i18n.amPm[1].toUpperCase();
-  },
-  ZZ: function(dateObj) {
-    var o = dateObj.getTimezoneOffset();
-    return (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4);
-  }
-};
-
-var parseFlags = {
-  D: [twoDigits, function (d, v) {
-    d.day = v;
-  }],
-  Do: [twoDigits + word, function (d, v) {
-    d.day = parseInt(v, 10);
-  }],
-  M: [twoDigits, function (d, v) {
-    d.month = v - 1;
-  }],
-  YY: [twoDigits, function (d, v) {
-    var da = new Date(), cent = +('' + da.getFullYear()).substr(0, 2);
-    d.year = '' + (v > 68 ? cent - 1 : cent) + v;
-  }],
-  h: [twoDigits, function (d, v) {
-    d.hour = v;
-  }],
-  m: [twoDigits, function (d, v) {
-    d.minute = v;
-  }],
-  s: [twoDigits, function (d, v) {
-    d.second = v;
-  }],
-  YYYY: [fourDigits, function (d, v) {
-    d.year = v;
-  }],
-  S: ['\\d', function (d, v) {
-    d.millisecond = v * 100;
-  }],
-  SS: ['\\d{2}', function (d, v) {
-    d.millisecond = v * 10;
-  }],
-  SSS: [threeDigits, function (d, v) {
-    d.millisecond = v;
-  }],
-  d: [twoDigits, noop],
-  ddd: [word, noop],
-  MMM: [word, monthUpdate('monthNamesShort')],
-  MMMM: [word, monthUpdate('monthNames')],
-  a: [word, function (d, v, i18n) {
-    var val = v.toLowerCase();
-    if (val === i18n.amPm[0]) {
-      d.isPm = false;
-    } else if (val === i18n.amPm[1]) {
-      d.isPm = true;
-    }
-  }],
-  ZZ: ['[^\\s]*?[\\+\\-]\\d\\d:?\\d\\d|[^\\s]*?Z', function (d, v) {
-    var parts = (v + '').match(/([+-]|\d\d)/gi), minutes;
-
-    if (parts) {
-      minutes = +(parts[1] * 60) + parseInt(parts[2], 10);
-      d.timezoneOffset = parts[0] === '+' ? minutes : -minutes;
-    }
-  }]
-};
-parseFlags.dd = parseFlags.d;
-parseFlags.dddd = parseFlags.ddd;
-parseFlags.DD = parseFlags.D;
-parseFlags.mm = parseFlags.m;
-parseFlags.hh = parseFlags.H = parseFlags.HH = parseFlags.h;
-parseFlags.MM = parseFlags.M;
-parseFlags.ss = parseFlags.s;
-parseFlags.A = parseFlags.a;
-
-
-// Some common format strings
-fecha.masks = {
-  default: 'ddd MMM DD YYYY HH:mm:ss',
-  shortDate: 'M/D/YY',
-  mediumDate: 'MMM D, YYYY',
-  longDate: 'MMMM D, YYYY',
-  fullDate: 'dddd, MMMM D, YYYY',
-  shortTime: 'HH:mm',
-  mediumTime: 'HH:mm:ss',
-  longTime: 'HH:mm:ss.SSS'
-};
-
-/***
- * Format a date
- * @method format
- * @param {Date|number} dateObj
- * @param {string} mask Format of the date, i.e. 'mm-dd-yy' or 'shortDate'
- */
-fecha.format = function (dateObj, mask, i18nSettings) {
-  var i18n = i18nSettings || fecha.i18n;
-
-  if (typeof dateObj === 'number') {
-    dateObj = new Date(dateObj);
-  }
-
-  if (Object.prototype.toString.call(dateObj) !== '[object Date]' || isNaN(dateObj.getTime())) {
-    throw new Error('Invalid Date in fecha.format');
-  }
-
-  mask = fecha.masks[mask] || mask || fecha.masks['default'];
-
-  var literals = [];
-
-  // Make literals inactive by replacing them with ??
-  mask = mask.replace(literal, function($0, $1) {
-    literals.push($1);
-    return '@@@';
-  });
-  // Apply formatting rules
-  mask = mask.replace(token, function ($0) {
-    return $0 in formatFlags ? formatFlags[$0](dateObj, i18n) : $0.slice(1, $0.length - 1);
-  });
-  // Inline literal values back into the formatted value
-  return mask.replace(/@@@/g, function() {
-    return literals.shift();
-  });
-};
-
-/**
- * Parse a date string into an object, changes - into /
- * @method parse
- * @param {string} dateStr Date string
- * @param {string} format Date parse format
- * @returns {Date|boolean}
- */
-fecha.parse = function (dateStr, format, i18nSettings) {
-  var i18n = i18nSettings || fecha.i18n;
-
-  if (typeof format !== 'string') {
-    throw new Error('Invalid format in fecha.parse');
-  }
-
-  format = fecha.masks[format] || format;
-
-  // Avoid regular expression denial of service, fail early for really long strings
-  // https://www.owasp.org/index.php/Regular_expression_Denial_of_Service_-_ReDoS
-  if (dateStr.length > 1000) {
-    return null;
-  }
-
-  var dateInfo = {};
-  var parseInfo = [];
-  var literals = [];
-  format = format.replace(literal, function($0, $1) {
-    literals.push($1);
-    return '@@@';
-  });
-  var newFormat = regexEscape(format).replace(token, function ($0) {
-    if (parseFlags[$0]) {
-      var info = parseFlags[$0];
-      parseInfo.push(info[1]);
-      return '(' + info[0] + ')';
-    }
-
-    return $0;
-  });
-  newFormat = newFormat.replace(/@@@/g, function() {
-    return literals.shift();
-  });
-  var matches = dateStr.match(new RegExp(newFormat, 'i'));
-  if (!matches) {
-    return null;
-  }
-
-  for (var i = 1; i < matches.length; i++) {
-    parseInfo[i - 1](dateInfo, matches[i], i18n);
-  }
-
-  var today = new Date();
-  if (dateInfo.isPm === true && dateInfo.hour != null && +dateInfo.hour !== 12) {
-    dateInfo.hour = +dateInfo.hour + 12;
-  } else if (dateInfo.isPm === false && +dateInfo.hour === 12) {
-    dateInfo.hour = 0;
-  }
-
-  var date;
-  if (dateInfo.timezoneOffset != null) {
-    dateInfo.minute = +(dateInfo.minute || 0) - +dateInfo.timezoneOffset;
-    date = new Date(Date.UTC(dateInfo.year || today.getFullYear(), dateInfo.month || 0, dateInfo.day || 1,
-      dateInfo.hour || 0, dateInfo.minute || 0, dateInfo.second || 0, dateInfo.millisecond || 0));
-  } else {
-    date = new Date(dateInfo.year || today.getFullYear(), dateInfo.month || 0, dateInfo.day || 1,
-      dateInfo.hour || 0, dateInfo.minute || 0, dateInfo.second || 0, dateInfo.millisecond || 0);
-  }
-  return date;
-};
-
-var a=function(){try{(new Date).toLocaleDateString("i");}catch(e){return "RangeError"===e.name}return !1}()?function(e,t){return e.toLocaleDateString(t,{year:"numeric",month:"long",day:"numeric"})}:function(t){return fecha.format(t,"mediumDate")},n=function(){try{(new Date).toLocaleString("i");}catch(e){return "RangeError"===e.name}return !1}()?function(e,t){return e.toLocaleString(t,{year:"numeric",month:"long",day:"numeric",hour:"numeric",minute:"2-digit"})}:function(t){return fecha.format(t,"haDateTime")},r=function(){try{(new Date).toLocaleTimeString("i");}catch(e){return "RangeError"===e.name}return !1}()?function(e,t){return e.toLocaleTimeString(t,{hour:"numeric",minute:"2-digit"})}:function(t){return fecha.format(t,"shortTime")};var p=function(e){return e.substr(e.indexOf(".")+1)};var y=function(e){return void 0===e.attributes.friendly_name?p(e.entity_id).replace(/_/g," "):e.attributes.friendly_name||""};
-
 class ThermostatPopupCard extends LitElement {
     constructor() {
         super();
@@ -3152,27 +2840,27 @@ class ThermostatPopupCard extends LitElement {
         console.log(stateObj);
         var icon = this.config.icon ? this.config.icon : stateObj.attributes.icon ? stateObj.attributes.icon : 'mdi:lightbulb';
         // REAL DATA
-        var name = this.config.name || y(this.hass.states[this.config.entity]);
-        var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
-        var currentTemp = stateObj.attributes.current_temperature;
-        var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
-        // DEV DATA
-        // var targetTemp = 22;
-        // var currentTemp = 20;
-        // var name = 'Verwarming';
-        // var stateObj: any = {
-        //   state: "off",
-        //   attributes: {
-        //     hvac_modes: ['heat', 'off'],
-        //     preset_mode: null,
-        //     preset_modes: ['eco', 'comfort'],
-        //     // target_temp_low: 17,
-        //     // target_temp_high: 22,
-        //     min_temp: 8,
-        //     max_temp: 28
-        //   }
-        // }
+        // var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
+        // var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
+        // var currentTemp = stateObj.attributes.current_temperature
         // var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
+        // DEV DATA
+        var targetTemp = 22;
+        var currentTemp = 20;
+        var name = 'Verwarming';
+        var stateObj = {
+            state: "off",
+            attributes: {
+                hvac_modes: ['heat', 'off'],
+                preset_mode: null,
+                preset_modes: ['eco', 'comfort'],
+                // target_temp_low: 17,
+                // target_temp_high: 22,
+                min_temp: 8,
+                max_temp: 28
+            }
+        };
+        var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
         var _handleSize = 15;
         var _stepSize = stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 0.5;
         var gradient = true;
@@ -3184,12 +2872,13 @@ class ThermostatPopupCard extends LitElement {
             { point: 70, color: '#faaa00' },
             { point: 100, color: '#f86618' },
         ];
+        var fullscreen = "fullscreen" in this.config ? this.config.fullscreen : true;
         return html `
-      <div class="popup-wrapper" style="margin-top:64px;">
+      <div class="${fullscreen === true ? 'popup-wrapper' : ''}">
         <div class="popup-inner ${classMap({
             [mode]: true,
         })}" @click="${e => this._close(e)}">
-          <div class="info" style="margin-top:-64px;">
+          <div class="info${fullscreen === true ? ' fullscreen' : ''}">
             <div class="temp ${mode}">
               ${currentTemp}&#176;
             </div>
@@ -3389,6 +3078,7 @@ class ThermostatPopupCard extends LitElement {
             --unknown-color: #bac;
         }
         .popup-wrapper {
+          margin-top:64px;
           position: absolute;
           top: 0;
           left: 0;
@@ -3402,6 +3092,9 @@ class ThermostatPopupCard extends LitElement {
           align-items: center;
           justify-content: center;
           flex-direction: column;
+        }
+        .fullscreen {
+          margin-top:-64px;
         }
         .info {
           display:flex;

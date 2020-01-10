@@ -46,29 +46,29 @@ class ThermostatPopupCard extends LitElement {
     var icon = this.config.icon ? this.config.icon : stateObj.attributes.icon ? stateObj.attributes.icon: 'mdi:lightbulb';
 
     // REAL DATA
-    var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
-    var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
-    var currentTemp = stateObj.attributes.current_temperature
-    var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
+    // var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
+    // var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
+    // var currentTemp = stateObj.attributes.current_temperature
+    // var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
 
 
     // DEV DATA
-    // var targetTemp = 22;
-    // var currentTemp = 20;
-    // var name = 'Verwarming';
-    // var stateObj: any = {
-    //   state: "off",
-    //   attributes: {
-    //     hvac_modes: ['heat', 'off'],
-    //     preset_mode: null,
-    //     preset_modes: ['eco', 'comfort'],
-    //     // target_temp_low: 17,
-    //     // target_temp_high: 22,
-    //     min_temp: 8,
-    //     max_temp: 28
-    //   }
-    // }
-    // var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
+    var targetTemp = 22;
+    var currentTemp = 20;
+    var name = 'Verwarming';
+    var stateObj: any = {
+      state: "off",
+      attributes: {
+        hvac_modes: ['heat', 'off'],
+        preset_mode: null,
+        preset_modes: ['eco', 'comfort'],
+        // target_temp_low: 17,
+        // target_temp_high: 22,
+        min_temp: 8,
+        max_temp: 28
+      }
+    }
+    var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
 
     var _handleSize = 15;
     var _stepSize = stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 0.5;
@@ -81,13 +81,14 @@ class ThermostatPopupCard extends LitElement {
       {point: 70, color: '#faaa00'},
       {point: 100, color: '#f86618'},
     ];
+    var fullscreen = "fullscreen" in this.config ? this.config.fullscreen : true;
 
     return html`
-      <div class="popup-wrapper" style="margin-top:64px;">
+      <div class="${fullscreen === true ? 'popup-wrapper':''}">
         <div class="popup-inner ${classMap({
           [mode]: true,
         })}" @click="${e => this._close(e)}">
-          <div class="info" style="margin-top:-64px;">
+          <div class="info${fullscreen === true ? ' fullscreen':''}">
             <div class="temp ${mode}">
               ${currentTemp}&#176;
             </div>
@@ -323,6 +324,7 @@ class ThermostatPopupCard extends LitElement {
             --unknown-color: #bac;
         }
         .popup-wrapper {
+          margin-top:64px;
           position: absolute;
           top: 0;
           left: 0;
@@ -336,6 +338,9 @@ class ThermostatPopupCard extends LitElement {
           align-items: center;
           justify-content: center;
           flex-direction: column;
+        }
+        .fullscreen {
+          margin-top:-64px;
         }
         .info {
           display:flex;
