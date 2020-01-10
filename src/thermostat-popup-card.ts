@@ -83,11 +83,11 @@ class ThermostatPopupCard extends LitElement {
     ];
 
     return html`
-      <div class="popup-wrapper" @click="${e => this._close(e)}">
+      <div class="popup-wrapper" style="margin-top:64px;">
         <div class="popup-inner ${classMap({
           [mode]: true,
-        })}">
-          <div class="info">
+        })}" @click="${e => this._close(e)}">
+          <div class="info" style="margin-top:-64px;">
             <div class="temp ${mode}">
               ${currentTemp}&#176;
             </div>
@@ -242,7 +242,7 @@ class ThermostatPopupCard extends LitElement {
   }
 
   _close(event) {
-      if(event && event.target.className === 'popup-inner') {
+      if(event && event.target.className.includes('popup-inner')) {
           closePopUp();
       }
   }
