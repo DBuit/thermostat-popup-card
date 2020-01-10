@@ -31,6 +31,7 @@ resources:
 | Name | Type | Default | Supported options | Description |
 | -------------- | ----------- | ------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `entity` | string | **Required** | `climate.nest` | Entity of the thermostat |
+| `fullscreen` | boolean | optional| true | If false it will remove the pop-up wrapper which makes it fullscreen |
 
 
 Example configuration in lovelace-ui.yaml
