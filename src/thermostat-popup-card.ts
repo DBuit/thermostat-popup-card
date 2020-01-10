@@ -55,9 +55,9 @@ class ThermostatPopupCard extends LitElement {
     // DEV DATA
     // var targetTemp = 22;
     // var currentTemp = 20;
-    // var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
     // var name = 'Verwarming';
     // var stateObj: any = {
+    //   state: "off",
     //   attributes: {
     //     hvac_modes: ['heat', 'off'],
     //     preset_mode: null,
@@ -68,6 +68,7 @@ class ThermostatPopupCard extends LitElement {
     //     max_temp: 28
     //   }
     // }
+    // var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
 
     var _handleSize = 15;
     var _stepSize = stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 0.5;
@@ -83,7 +84,9 @@ class ThermostatPopupCard extends LitElement {
 
     return html`
       <div class="popup-wrapper" @click="${e => this._close(e)}">
-        <div class="popup-inner">
+        <div class="popup-inner ${classMap({
+          [mode]: true,
+        })}">
           <div class="info">
             <div class="temp ${mode}">
               ${currentTemp}&#176;
@@ -294,6 +297,18 @@ class ThermostatPopupCard extends LitElement {
   
   static get styles() {
     return css`
+        :root {
+            --auto-color: green;
+            --eco-color: springgreen;
+            --cool-color: #2b9af9;
+            --heat-color: #ff8100;
+            --manual-color: #44739e;
+            --off-color: #8a8a8a;
+            --fan_only-color: #8a8a8a;
+            --dry-color: #efbd07;
+            --idle-color: #8a8a8a;
+            --unknown-color: #bac;
+        }
         :host {
             background-color:#000!important;
             --auto-color: green;
@@ -476,7 +491,7 @@ class ThermostatPopupCard extends LitElement {
           display: inline-block;
         }
         #modes .selected-icon {
-          color: var(--mode-color);
+          --iron-icon-fill-color: var(--mode-color);
         }
         text {
           fill: var(--primary-text-color);
@@ -905,8 +920,8 @@ class CustomRoundSlider extends LitElement {
         stroke: var(--round-slider-bar-color, transparent);
       }
       .block {
-        stroke-width: calc(var(--round-slider-path-width, 30) + 1);
-        stroke: var(--round-slider-block-color, #2c2c2e);
+        stroke-width: var(--round-slider-block-path-width, 31);
+        stroke: #2c2c2e;
       }
       .block-dash {
         stroke-width: var(--round-slider-dash-width, 20);
