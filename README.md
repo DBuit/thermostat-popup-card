@@ -32,6 +32,7 @@ resources:
 | -------------- | ----------- | ------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `entity` | string | **Required** | `climate.nest` | Entity of the thermostat |
 | `fullscreen` | boolean | optional| true | If false it will remove the pop-up wrapper which makes it fullscreen |
+| `stepSize` | number | optional| 1 | If your climate gives a target_temp_step in the attributes this will be used, fallback is 1 if you don't set in in your configuration. |
 
 
 Example configuration in lovelace-ui.yaml

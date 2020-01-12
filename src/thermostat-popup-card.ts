@@ -42,36 +42,47 @@ class ThermostatPopupCard extends LitElement {
   render() {
     var entity = this.config.entity;
     var stateObj = this.hass.states[entity];
-    console.log(stateObj);
     var icon = this.config.icon ? this.config.icon : stateObj.attributes.icon ? stateObj.attributes.icon: 'mdi:lightbulb';
 
     // REAL DATA
-    // var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
-    // var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
-    // var currentTemp = stateObj.attributes.current_temperature
-    // var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
+    var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
+    var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
+    var currentTemp = stateObj.attributes.current_temperature
+    var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
 
 
     // DEV DATA
-    var targetTemp = 22;
-    var currentTemp = 20;
-    var name = 'Verwarming';
-    var stateObj: any = {
-      state: "off",
-      attributes: {
-        hvac_modes: ['heat', 'off'],
-        preset_mode: null,
-        preset_modes: ['eco', 'comfort'],
-        // target_temp_low: 17,
-        // target_temp_high: 22,
-        min_temp: 8,
-        max_temp: 28
-      }
+    // var targetTemp = 22;
+    // var currentTemp = 20;
+    // var name = 'Verwarming';
+    // var stateObj: any = {
+    //   state: "on",
+    //   attributes: {
+    //     hvac_action: 'heating',
+    //     hvac_modes: ['heat', 'off'],
+    //     // preset_mode: null,
+    //     // preset_modes: ['eco', 'comfort'],
+    //     // target_temp_low: 17,
+    //     // target_temp_high: 22,
+    //     min_temp: 5,
+    //     max_temp: 25
+    //   }
+    // }
+    
+    var mode:any = '';
+    if(stateObj.state == 'off') {
+      mode = 'off';
+    } else if(stateObj.attributes.hvac_action == 'heating') {
+      mode = 'heat';
+    } else if(stateObj.attributes.hvac_action == 'idle') {
+      mode = 'idle';
+    } else {
+      mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
     }
-    var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
-
+    
+    
     var _handleSize = 15;
-    var _stepSize = stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 0.5;
+    var _stepSize = this.config.stepSize ? this.config.stepSize : stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 1;
     var gradient = true;
     var gradientPoints = [
       {point: 0, color: '#4fdae4'},
@@ -298,29 +309,16 @@ class ThermostatPopupCard extends LitElement {
   
   static get styles() {
     return css`
-        :root {
-            --auto-color: green;
-            --eco-color: springgreen;
-            --cool-color: #2b9af9;
-            --heat-color: #ff8100;
-            --manual-color: #44739e;
-            --off-color: #8a8a8a;
-            --fan_only-color: #8a8a8a;
-            --dry-color: #efbd07;
-            --idle-color: #8a8a8a;
-            --unknown-color: #bac;
-        }
         :host {
-            background-color:#000!important;
-            --auto-color: green;
+            --auto-color: #EE7600;
             --eco-color: springgreen;
             --cool-color: #2b9af9;
-            --heat-color: #ff8100;
+            --heat-color: #EE7600;
             --manual-color: #44739e;
-            --off-color: #8a8a8a;
+            --off-color: lightgrey;
             --fan_only-color: #8a8a8a;
             --dry-color: #efbd07;
-            --idle-color: #8a8a8a;
+            --idle-color: #00CC66;
             --unknown-color: #bac;
         }
         .popup-wrapper {
