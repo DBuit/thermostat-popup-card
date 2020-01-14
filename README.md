@@ -13,7 +13,7 @@ Go to the hacs store and use the repo url `https://github.com/DBuit/thermostat-p
 Add the following to your ui-lovelace.yaml:
 ```yaml
 resources:
-  url: /community_plugin/light-popup-card/thermostat-popup-card.js
+  url: /community_plugin/thermostat-popup-card/thermostat-popup-card.js
   type: module
 ```
 
