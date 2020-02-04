@@ -304,7 +304,7 @@ class ThermostatPopupCard extends LitElement {
   }
 
   getCardSize() {
-    return this.config.entities.length + 1;
+    return 1;
   }
   
   static get styles() {
@@ -642,17 +642,13 @@ class CustomRoundSlider extends LitElement {
   dragStart(ev) {
     let handle = ev.target;
 
-    console.log(handle);
-
     // Avoid double events mouseDown->focus
     if(this._rotation && this._rotation.type !== "focus") {
-      console.log('AVOUD DOUBLE');
       return;
     }
 
     // If an invisible handle was clicked, switch to the visible counterpart
     if(handle.classList.contains("overflow")) {
-      console.log('SWITCH VISIBLE')
       handle = handle.nextElementSibling
     }
       
@@ -787,7 +783,6 @@ class CustomRoundSlider extends LitElement {
   _renderHandle(id) {
     const theta = this._value2angle(this[id]);
     const pos = this._angle2xy(theta);
-    console.log('ID: '+id);
 
     // Two handles are drawn. One visible, and one invisible that's twice as
     // big. Makes it easier to click.
@@ -823,8 +818,6 @@ class CustomRoundSlider extends LitElement {
 
   render() {
     const view = this._boundaries;
-    console.log(this);
-    console.log(this.gradientPoints);
     return html`
       <svg
         @mousedown=${this.dragStart}
