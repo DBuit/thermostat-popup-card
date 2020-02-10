@@ -323,9 +323,9 @@ class ThermostatPopupCard extends LitElement {
   }
 
   _close(event) {
-      if(event && event.target.className.includes('popup-inner')) {
-          closePopUp();
-      }
+    if(event && (event.target.className === 'popup-inner' || event.target.className === 'settings-inner')) {
+      closePopUp();
+    }
   }
 
   _dragEvent(e): void {
