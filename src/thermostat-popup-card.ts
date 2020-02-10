@@ -26,6 +26,8 @@ class ThermostatPopupCard extends LitElement {
     fan_only: "hass:fan",
     dry: "hass:water-percent",
   };
+  settings = false;
+  settingsCustomCard = false;
 
   static get properties() {
     return {
@@ -49,25 +51,6 @@ class ThermostatPopupCard extends LitElement {
     var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
     var currentTemp = stateObj.attributes.current_temperature
     var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
-
-
-    // DEV DATA
-    // var targetTemp = 22;
-    // var currentTemp = 20;
-    // var name = 'Verwarming';
-    // var stateObj: any = {
-    //   state: "on",
-    //   attributes: {
-    //     hvac_action: 'heating',
-    //     hvac_modes: ['heat', 'off'],
-    //     // preset_mode: null,
-    //     // preset_modes: ['eco', 'comfort'],
-    //     // target_temp_low: 17,
-    //     // target_temp_high: 22,
-    //     min_temp: 5,
-    //     max_temp: 25
-    //   }
-    // }
     
     var mode:any = '';
     if(stateObj.state == 'off') {
@@ -93,10 +76,12 @@ class ThermostatPopupCard extends LitElement {
       {point: 100, color: '#f86618'},
     ];
     var fullscreen = "fullscreen" in this.config ? this.config.fullscreen : true;
+    this.settings = "settings" in this.config? true : false;
+    this.settingsCustomCard = "settingsCard" in this.config? true : false;
 
     return html`
       <div class="${fullscreen === true ? 'popup-wrapper':''}">
-        <div class="popup-inner ${classMap({
+        <div id="popup" class="popup-inner ${classMap({
           [mode]: true,
         })}" @click="${e => this._close(e)}">
           <div class="info${fullscreen === true ? ' fullscreen':''}">
@@ -200,13 +185,84 @@ class ThermostatPopupCard extends LitElement {
               .sort(this._compareClimateHvacModes)
               .map((modeItem) => this._renderIcon(modeItem, mode))}
           </div>
+          ${this.settings ? html`<button class="bottom-right-btn" @click="${() => this._openSettings()}">${this.config.settings.openButton ? this.config.settings.openButton:'Settings'}</button>`:html``}
         </div>
+        ${this.settings ? html`
+            <div id="settings" class="${fullscreen === true ? ' fullscreen':''}">
+              <div class="settings-inner" @click="${e => this._close(e)}">
+                ${this.settingsCustomCard ? html`
+                  <card-maker nohass data-card="${this.config.settingsCard.type}" data-options="${JSON.stringify(this.config.settingsCard.cardOptions)}" data-style="${this.config.settingsCard.cardStyle ? this.config.settingsCard.cardStyle : ''}">
+                  </card-maker>
+                `:html`
+                    <more-info-controls
+                    .dialogElement=${null}
+                    .canConfigure=${false}
+                    .hass=${this.hass}
+                    .stateObj=${stateObj}
+                    style="--paper-slider-knob-color: white !important;
+                    --paper-slider-knob-start-color: white !important;
+                    --paper-slider-pin-color: white !important;
+                    --paper-slider-active-color: white !important;
+                    color: white !important;
+                    --primary-text-color: white !important;"
+                  ></more-info-controls>
+                `}
+                <button class="bottom-right-btn" @click="${() => this._closeSettings()}">${this.config.settings.closeButton ? this.config.settings.closeButton:'Close'}</button>
+              </div>
+            </div>
+          `:html``}
       </div>
     `;
+  }
+
+  firstUpdated() {
+    if(this.settings && !this.settingsCustomCard) {
+    const mic = this.shadowRoot.querySelector("more-info-controls").shadowRoot;
+    mic.removeChild(mic.querySelector("app-toolbar"));
+    } else if(this.settings && this.settingsCustomCard) {
+      this.shadowRoot.querySelectorAll("card-maker").forEach(customCard => {
+        var card = {
+          type: customCard.dataset.card
+        };
+        card = Object.assign({}, card, JSON.parse(customCard.dataset.options));
+        customCard.config = card;
+
+        let style = "";
+        if(customCard.dataset.style) {
+          style = customCard.dataset.style;
+        }
+
+        if(style != "") {
+          let itterations = 0;
+          let interval = setInterval(function () {
+            let el = customCard.children[0];
+            if(el) {
+              window.clearInterval(interval);
+
+              var styleElement = document.createElement('style');
+              styleElement.innerHTML = style;
+              el.shadowRoot.appendChild(styleElement);
+
+            } else if (++itterations === 10 ) {
+              window.clearInterval(interval);
+            }
+          }, 100);
+        }
+      });
+    }
   }
   
   updated() {
     this._setTemp = this._getSetTemp(this.hass!.states[this.config!.entity]);
+  }
+
+  _openSettings() {
+    this.shadowRoot.getElementById('popup').classList.add("off");
+    this.shadowRoot.getElementById('settings').classList.add("on");
+  }
+  _closeSettings() {
+    this.shadowRoot.getElementById('settings').classList.remove("on");
+    this.shadowRoot.getElementById('popup').classList.remove("off");
   }
 
   _renderIcon(mode: string, currentMode: string) {
@@ -336,6 +392,43 @@ class ThermostatPopupCard extends LitElement {
           align-items: center;
           justify-content: center;
           flex-direction: column;
+        }
+        .popup-inner.off {
+          display:none;
+        }
+        #settings {
+          position:relative;
+          display:none;
+        }
+        #settings.fullscreen {
+          position:absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+        }
+        .settings-inner {
+          height: 100%;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+        }
+        #settings.on {
+          display:block;
+        }
+        .bottom-right-btn {
+          position:absolute;
+          bottom:15px;
+          right:30px;
+          background-color: #7f8082;
+          color: #FFF;
+          border: 0;
+          padding: 5px 20px;
+          border-radius: 10px;
+          font-weight: 500;
+          cursor: pointer;
         }
         .fullscreen {
           margin-top:-64px;

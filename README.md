@@ -36,6 +36,7 @@ resources:
 | `entity` | string | **Required** | `climate.nest` | Entity of the thermostat |
 | `fullscreen` | boolean | optional| true | If false it will remove the pop-up wrapper which makes it fullscreen |
 | `stepSize` | number | optional| 1 | If your climate gives a target_temp_step in the attributes this will be used, fallback is 1 if you don't set in in your configuration. |
+| `settings` | boolean | optional | false | When it will add an settings button that displays the more-info content see settings example for my light popup for more options/information [here]: https://github.com/DBuit/light-popup-card#settings |
 
 
 Example configuration in lovelace-ui.yaml
