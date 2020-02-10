@@ -78,6 +78,19 @@ class ThermostatPopupCard extends LitElement {
     var fullscreen = "fullscreen" in this.config ? this.config.fullscreen : true;
     this.settings = "settings" in this.config? true : false;
     this.settingsCustomCard = "settingsCard" in this.config? true : false;
+    if(this.settingsCustomCard && this.config.settingsCard.cardOptions) {
+      if(this.config.settingsCard.cardOptions.entity && this.config.settingsCard.cardOptions.entity == 'this') {
+        this.config.settingsCard.cardOptions.entity = entity;
+      } else if(this.config.settingsCard.cardOptions.entity_id && this.config.settingsCard.cardOptions.entity_id == 'this') {
+        this.config.settingsCard.cardOptions.entity_id = entity;
+      } else if(this.config.settingsCard.cardOptions.entities) {
+        for(let key in this.config.settingsCard.cardOptions.entities) {
+          if(this.config.settingsCard.cardOptions.entities[key] == 'this') {
+            this.config.settingsCard.cardOptions.entities[key] = entity;
+          }
+        }
+      }
+    }
 
     return html`
       <div class="${fullscreen === true ? 'popup-wrapper':''}">
