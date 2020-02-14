@@ -28,6 +28,7 @@ class ThermostatPopupCard extends LitElement {
   };
   settings = false;
   settingsCustomCard = false;
+  settingsPosition = "bottom";
 
   static get properties() {
     return {
@@ -78,6 +79,7 @@ class ThermostatPopupCard extends LitElement {
     var fullscreen = "fullscreen" in this.config ? this.config.fullscreen : true;
     this.settings = "settings" in this.config? true : false;
     this.settingsCustomCard = "settingsCard" in this.config? true : false;
+    this.settingsPosition = "settingsPosition" in this.config ? this.config.settingsPosition : "bottom";
     if(this.settingsCustomCard && this.config.settingsCard.cardOptions) {
       if(this.config.settingsCard.cardOptions.entity && this.config.settingsCard.cardOptions.entity == 'this') {
         this.config.settingsCard.cardOptions.entity = entity;
@@ -94,136 +96,134 @@ class ThermostatPopupCard extends LitElement {
 
     return html`
       <div class="${fullscreen === true ? 'popup-wrapper':''}">
-        <div id="popup" class="popup-inner ${classMap({
-          [mode]: true,
-        })}" @click="${e => this._close(e)}">
-          <div class="info${fullscreen === true ? ' fullscreen':''}">
-            <div class="temp ${mode}">
-              ${currentTemp}&#176;
+        <div class="${classMap({[mode]: true})}" style="display:flex;width:100%;height:100%;">
+          <div id="popup" class="popup-inner" @click="${e => this._close(e)}">
+            <div class="info${fullscreen === true ? ' fullscreen':''}">
+              <div class="temp ${mode}">
+                ${currentTemp}&#176;
+              </div>
+              <div class="right">
+                <div class="name">${name}</div>
+                <div class="action">
+                ${
+                  stateObj.attributes.hvac_action
+                    ? this.hass!.localize(
+                        `state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`
+                      )
+                    : this.hass!.localize(`state.climate.${stateObj.state}`)
+                }
+                ${
+                  stateObj.attributes.preset_mode &&
+                  stateObj.attributes.preset_mode !== "none"
+                    ? html`
+                        -
+                        ${this.hass!.localize(
+                          `state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`
+                        ) || stateObj.attributes.preset_mode}
+                      `
+                    : ""
+                }
+                ${targetTemp}&#176;</div>
+              </div>
             </div>
-            <div class="right">
-              <div class="name">${name}</div>
-              <div class="action">
-              ${
-                stateObj.attributes.hvac_action
-                  ? this.hass!.localize(
-                      `state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`
-                    )
-                  : this.hass!.localize(`state.climate.${stateObj.state}`)
-              }
-              ${
-                stateObj.attributes.preset_mode &&
-                stateObj.attributes.preset_mode !== "none"
-                  ? html`
-                      -
-                      ${this.hass!.localize(
-                        `state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`
-                      ) || stateObj.attributes.preset_mode}
-                    `
-                  : ""
-              }
-               ${targetTemp}&#176;</div>
-            </div>
-          </div>
 
 
-          <div id="controls">
-            <div id="slider">
-              <custom-round-slider
-                .value=${targetTemp}
-                .low=${stateObj.attributes.target_temp_low}
-                .high=${stateObj.attributes.target_temp_high}
-                .min=${stateObj.attributes.min_temp}
-                .max=${stateObj.attributes.max_temp}
-                .step=${_stepSize}
-                .handleSize=${_handleSize}
-                .gradient=${gradient}
-                .gradientPoints=${gradientPoints}
-                @value-changing=${this._dragEvent}
-                @value-changed=${this._setTemperature}
-              ></custom-round-slider>
+            <div id="controls">
+              <div id="slider">
+                <custom-round-slider
+                  .value=${targetTemp}
+                  .low=${stateObj.attributes.target_temp_low}
+                  .high=${stateObj.attributes.target_temp_high}
+                  .min=${stateObj.attributes.min_temp}
+                  .max=${stateObj.attributes.max_temp}
+                  .step=${_stepSize}
+                  .handleSize=${_handleSize}
+                  .gradient=${gradient}
+                  .gradientPoints=${gradientPoints}
+                  @value-changing=${this._dragEvent}
+                  @value-changed=${this._setTemperature}
+                ></custom-round-slider>
 
-              <div id="slider-center">
-                <div class="values">
-                  <div class="action">
-                    ${
-                      stateObj.attributes.hvac_action
-                        ? this.hass!.localize(
-                            `state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`
-                          )
-                        : this.hass!.localize(`state.climate.${stateObj.state}`)
-                    }
-                    ${
-                      stateObj.attributes.preset_mode &&
-                      stateObj.attributes.preset_mode !== "none"
-                        ? html`
-                            -
-                            ${this.hass!.localize(
-                              `state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`
-                            ) || stateObj.attributes.preset_mode}
-                          `
-                        : ""
-                    }
-                  </div>
-                  <div class="value">
-                    ${
-                      !this._setTemp
-                        ? ""
-                        : Array.isArray(this._setTemp)
-                        ? _stepSize === 1
+                <div id="slider-center">
+                  <div class="values">
+                    <div class="action">
+                      ${
+                        stateObj.attributes.hvac_action
+                          ? this.hass!.localize(
+                              `state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`
+                            )
+                          : this.hass!.localize(`state.climate.${stateObj.state}`)
+                      }
+                      ${
+                        stateObj.attributes.preset_mode &&
+                        stateObj.attributes.preset_mode !== "none"
+                          ? html`
+                              -
+                              ${this.hass!.localize(
+                                `state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`
+                              ) || stateObj.attributes.preset_mode}
+                            `
+                          : ""
+                      }
+                    </div>
+                    <div class="value">
+                      ${
+                        !this._setTemp
+                          ? ""
+                          : Array.isArray(this._setTemp)
+                          ? _stepSize === 1
+                            ? svg`
+                                ${this._setTemp[0].toFixed()}&#176; -
+                                ${this._setTemp[1].toFixed()}&#176;
+                                `
+                            : svg`
+                                ${this._setTemp[0].toFixed(1)}&#176; -
+                                ${this._setTemp[1].toFixed(1)}&#176;
+                                `
+                          : _stepSize === 1
                           ? svg`
-                              ${this._setTemp[0].toFixed()}&#176; -
-                              ${this._setTemp[1].toFixed()}&#176;
-                              `
+                                ${this._setTemp.toFixed()}&#176;
+                                `
                           : svg`
-                              ${this._setTemp[0].toFixed(1)}&#176; -
-                              ${this._setTemp[1].toFixed(1)}&#176;
-                              `
-                        : _stepSize === 1
-                        ? svg`
-                              ${this._setTemp.toFixed()}&#176;
-                              `
-                        : svg`
-                              ${this._setTemp.toFixed(1)}&#176;
-                              `
-                    }
+                                ${this._setTemp.toFixed(1)}&#176;
+                                `
+                      }
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            <div id="modes">
+              ${(stateObj.attributes.hvac_modes || [])
+                .concat()
+                .sort(this._compareClimateHvacModes)
+                .map((modeItem) => this._renderIcon(modeItem, mode))}
+            </div>
+            ${this.settings ? html`<button class="settings-btn ${this.settingsPosition}${fullscreen === true ? ' fullscreen':''}" @click="${() => this._openSettings()}">${this.config.settings.openButton ? this.config.settings.openButton:'Settings'}</button>`:html``}
           </div>
-          <div id="modes">
-            ${(stateObj.attributes.hvac_modes || [])
-              .concat()
-              .sort(this._compareClimateHvacModes)
-              .map((modeItem) => this._renderIcon(modeItem, mode))}
-          </div>
-          ${this.settings ? html`<button class="bottom-right-btn" @click="${() => this._openSettings()}">${this.config.settings.openButton ? this.config.settings.openButton:'Settings'}</button>`:html``}
-        </div>
-        ${this.settings ? html`
-            <div id="settings" class="${fullscreen === true ? ' fullscreen':''}">
-              <div class="settings-inner" @click="${e => this._close(e)}">
-                ${this.settingsCustomCard ? html`
-                  <card-maker nohass data-card="${this.config.settingsCard.type}" data-options="${JSON.stringify(this.config.settingsCard.cardOptions)}" data-style="${this.config.settingsCard.cardStyle ? this.config.settingsCard.cardStyle : ''}">
-                  </card-maker>
-                `:html`
-                    <more-info-controls
-                    .dialogElement=${null}
-                    .canConfigure=${false}
-                    .hass=${this.hass}
-                    .stateObj=${stateObj}
-                    style="--paper-slider-knob-color: white !important;
-                    --paper-slider-knob-start-color: white !important;
-                    --paper-slider-pin-color: white !important;
-                    --paper-slider-active-color: white !important;
-                    color: white !important;
-                    --primary-text-color: white !important;"
-                  ></more-info-controls>
-                `}
-                <button class="bottom-right-btn" @click="${() => this._closeSettings()}">${this.config.settings.closeButton ? this.config.settings.closeButton:'Close'}</button>
-              </div>
+          ${this.settings ? html`
+            <div id="settings" class="settings-inner" @click="${e => this._close(e)}">
+              ${this.settingsCustomCard ? html`
+                <card-maker nohass data-card="${this.config.settingsCard.type}" data-options="${JSON.stringify(this.config.settingsCard.cardOptions)}" data-style="${this.config.settingsCard.cardStyle ? this.config.settingsCard.cardStyle : ''}">
+                </card-maker>
+              `:html`
+                  <more-info-controls
+                  .dialogElement=${null}
+                  .canConfigure=${false}
+                  .hass=${this.hass}
+                  .stateObj=${stateObj}
+                  style="--paper-slider-knob-color: white !important;
+                  --paper-slider-knob-start-color: white !important;
+                  --paper-slider-pin-color: white !important;
+                  --paper-slider-active-color: white !important;
+                  color: white !important;
+                  --primary-text-color: white !important;"
+                ></more-info-controls>
+              `}
+              <button class="settings-btn ${this.settingsPosition}${fullscreen === true ? ' fullscreen':''}" @click="${() => this._closeSettings()}">${this.config.settings.closeButton ? this.config.settings.closeButton:'Close'}</button>
             </div>
           `:html``}
+        </div>
       </div>
     `;
   }
@@ -323,7 +323,7 @@ class ThermostatPopupCard extends LitElement {
   }
 
   _close(event) {
-    if(event && (event.target.className === 'popup-inner' || event.target.className === 'settings-inner')) {
+    if(event && (event.target.className.includes('popup-inner') || event.target.className.includes('settings-inner'))) {
       closePopUp();
     }
   }
@@ -410,15 +410,7 @@ class ThermostatPopupCard extends LitElement {
           display:none;
         }
         #settings {
-          position:relative;
           display:none;
-        }
-        #settings.fullscreen {
-          position:absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
         }
         .settings-inner {
           height: 100%;
@@ -429,11 +421,10 @@ class ThermostatPopupCard extends LitElement {
           flex-direction: column;
         }
         #settings.on {
-          display:block;
+          display:flex;
         }
-        .bottom-right-btn {
+        .settings-btn {
           position:absolute;
-          bottom:15px;
           right:30px;
           background-color: #7f8082;
           color: #FFF;
@@ -442,6 +433,15 @@ class ThermostatPopupCard extends LitElement {
           border-radius: 10px;
           font-weight: 500;
           cursor: pointer;
+        }
+        .settings-btn.bottom {
+          bottom:15px;
+        }
+        .settings-btn.top {
+          top: 25px;
+        }
+        .settings-btn.bottom.fullscreen {
+          margin:0;
         }
         .fullscreen {
           margin-top:-64px;
