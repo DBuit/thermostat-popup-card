@@ -283,13 +283,13 @@ class ThermostatPopupCard extends LitElement {
       return html``;
     }
     return html`
-      <paper-icon-button
+      <ha-icon-button
         class="${classMap({ "selected-icon": currentMode === mode })}"
         .mode="${mode}"
         .icon="${this.modeIcons[mode]}"
         @click="${this._handleModeClick}"
         tabindex="0"
-      ></paper-icon-button>
+      ></ha-icon-button>
     `;
   }
 
@@ -603,7 +603,7 @@ class ThermostatPopupCard extends LitElement {
           --iron-icon-fill-color: var(--mode-color);
         }
         text {
-          fill: var(--primary-text-color);
+          color: var(--primary-text-color);
         }
     `;
   }
