@@ -600,7 +600,7 @@ class ThermostatPopupCard extends LitElement {
           display: inline-block;
         }
         #modes .selected-icon {
-          --iron-icon-fill-color: var(--mode-color);
+          color: var(--mode-color);
         }
         text {
           color: var(--primary-text-color);
