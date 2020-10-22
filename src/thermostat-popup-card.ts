@@ -53,18 +53,6 @@ class ThermostatPopupCard extends LitElement {
     var currentTemp = stateObj.attributes.current_temperature
     var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
     
-    var mode:any = '';
-    if(stateObj.state == 'off') {
-      mode = 'off';
-    } else if(stateObj.attributes.hvac_action == 'heating') {
-      mode = 'heat';
-    } else if(stateObj.attributes.hvac_action == 'idle') {
-      mode = 'idle';
-    } else {
-      mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
-    }
-    
-    
     var _handleSize = 15;
     var _stepSize = this.config.stepSize ? this.config.stepSize : stateObj.attributes.target_temp_step ? stateObj.attributes.target_temp_step : 1;
     var gradient = true;
