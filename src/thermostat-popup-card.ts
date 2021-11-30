@@ -18,7 +18,7 @@ class ThermostatPopupCard extends LitElement {
     off: 7,
   };
   modeIcons = {
-    auto: "hass:calendar-repeat",
+    auto: "hass:calendar-sync",
     heat_cool: "hass:autorenew",
     heat: "hass:fire",
     cool: "hass:snowflake",
@@ -367,7 +367,7 @@ class ThermostatPopupCard extends LitElement {
   static get styles() {
     return css`
         :host {
-            --auto-color: #EE7600;
+            --auto-color: #97b957;
             --eco-color: springgreen;
             --cool-color: #2b9af9;
             --heat-color: #EE7600;
@@ -501,6 +501,9 @@ class ThermostatPopupCard extends LitElement {
         
         /* CONTROLS */
         
+        .auto{
+          --mode-color: var(--auto-color);
+        }
         .heat_cool {
           --mode-color: var(--auto-color);
         }
