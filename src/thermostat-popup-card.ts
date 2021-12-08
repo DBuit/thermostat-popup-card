@@ -34,7 +34,8 @@ class ThermostatPopupCard extends LitElement {
     return {
       hass: {},
       config: {},
-      active: {}
+      active: {},
+      _setTemp: {},
     };
   }
   
@@ -49,7 +50,6 @@ class ThermostatPopupCard extends LitElement {
 
     // REAL DATA
     var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
-    var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
     var currentTemp = stateObj.attributes.current_temperature
     var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
     
@@ -111,7 +111,7 @@ class ThermostatPopupCard extends LitElement {
                       `
                     : ""
                 }
-                ${targetTemp}&#176;</div>
+                ${this._setTemp}&#176;</div>
               </div>
             </div>
 
@@ -119,7 +119,7 @@ class ThermostatPopupCard extends LitElement {
             <div id="controls">
               <div id="slider">
                 <custom-round-slider
-                  .value=${targetTemp}
+                  .value=${this._setTemp}
                   .low=${stateObj.attributes.target_temp_low}
                   .high=${stateObj.attributes.target_temp_high}
                   .min=${stateObj.attributes.min_temp}
@@ -217,6 +217,8 @@ class ThermostatPopupCard extends LitElement {
   }
 
   firstUpdated() {
+    this._setTemp = this._getSetTemp(this.hass.states[this.config.entity]);
+
     if(this.settings && !this.settingsCustomCard) {
     const mic = this.shadowRoot.querySelector("more-info-controls").shadowRoot;
     mic.removeChild(mic.querySelector("app-toolbar"));
@@ -251,10 +253,6 @@ class ThermostatPopupCard extends LitElement {
         }
       });
     }
-  }
-  
-  updated() {
-    this._setTemp = this._getSetTemp(this.hass!.states[this.config!.entity]);
   }
 
   _openSettings() {
