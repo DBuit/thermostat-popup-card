@@ -274,10 +274,9 @@ class ThermostatPopupCard extends LitElement {
       <ha-icon-button
         class="${classMap({ "selected-icon": currentMode === mode })}"
         .mode="${mode}"
-        .icon="${this.modeIcons[mode]}"
         @click="${this._handleModeClick}"
         tabindex="0"
-      ></ha-icon-button>
+      ><ha-icon icon="${this.modeIcons[mode]}"></ha-icon></ha-icon-button>
     `;
   }
 
