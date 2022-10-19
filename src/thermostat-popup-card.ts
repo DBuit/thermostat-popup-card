@@ -1,7 +1,6 @@
 import { LitElement, html, css, svg } from 'lit-element';
 import { classMap } from "lit-html/directives/class-map";
-import { closePopUp } from 'card-tools/src/popup';
-import { computeStateDisplay, computeStateName } from 'custom-card-helpers';
+import { fireEvent } from "card-tools/src/event";
 
 class ThermostatPopupCard extends LitElement {
   config: any;
@@ -48,7 +47,7 @@ class ThermostatPopupCard extends LitElement {
     var icon = this.config.icon ? this.config.icon : stateObj.attributes.icon ? stateObj.attributes.icon: 'mdi:lightbulb';
 
     // REAL DATA
-    var name = this.config!.name || computeStateName(this.hass!.states[this.config!.entity]);
+    var name = this.config!.name || this.hass!.states[this.config!.entity].attributes.friendly_name;
     var targetTemp = stateObj.attributes.temperature !== null && stateObj.attributes.temperature ? stateObj.attributes.temperature : stateObj.attributes.min_temp;
     var currentTemp = stateObj.attributes.current_temperature
     var mode = stateObj.state in this.modeIcons ? stateObj.state : "unknown-mode";
@@ -289,9 +288,6 @@ class ThermostatPopupCard extends LitElement {
     });
   }
 
-
-
-
   _getSetTemp(stateObj) {
     if (stateObj.state === "unavailable") {
       return this.hass!.localize("state.default.unavailable");
@@ -312,7 +308,15 @@ class ThermostatPopupCard extends LitElement {
 
   _close(event) {
     if(event && (event.target.className.includes('popup-inner') || event.target.className.includes('settings-inner'))) {
-      closePopUp();
+      const action = {
+          browser_mod: {
+              service: "browser_mod.close_popup",
+              data: {
+                browser_id: 'THIS'
+            }
+          }
+      }
+      fireEvent("ll-custom", action);
     }
   }
 
